@@ -1,4 +1,5 @@
 import json
+import os
 
 from holmes.config import Config
 
@@ -179,3 +180,50 @@ custom_runbook_catalogs:
     # Should have both builtin and custom runbooks
     runbook_links = [r.link for r in runbook_catalog.catalog]
     assert "test_custom.md" in runbook_links
+
+
+def test_load_from_env_custom_runbook_catalogs(tmp_path, monkeypatch):
+    """Test that custom_runbook_catalogs can be set via CUSTOM_RUNBOOK_CATALOGS env var."""
+    # Create a custom catalog file
+    custom_catalog_file = tmp_path / "catalog.json"
+    catalog_data = {
+        "catalog": [
+            {
+                "id": "env-test-runbook",
+                "update_date": "2023-01-01",
+                "description": "Test runbook from env",
+                "link": "test_env.md",
+            }
+        ]
+    }
+    custom_catalog_file.write_text(json.dumps(catalog_data))
+
+    monkeypatch.setenv("CUSTOM_RUNBOOK_CATALOGS", json.dumps([str(custom_catalog_file)]))
+    config = Config.load_from_env()
+
+    assert len(config.custom_runbook_catalogs) == 1
+    assert str(config.custom_runbook_catalogs[0]) == str(custom_catalog_file)
+
+
+def test_load_from_env_custom_runbook_catalogs_invalid_json(monkeypatch):
+    """Test graceful handling of invalid JSON in CUSTOM_RUNBOOK_CATALOGS env var."""
+    monkeypatch.setenv("CUSTOM_RUNBOOK_CATALOGS", "not-valid-json")
+    config = Config.load_from_env()
+
+    # Should fall back to default empty list
+    assert config.custom_runbook_catalogs == []
+
+
+def test_load_from_env_custom_runbook_catalogs_not_a_list(monkeypatch):
+    """Test graceful handling of non-list JSON in CUSTOM_RUNBOOK_CATALOGS env var."""
+    monkeypatch.setenv("CUSTOM_RUNBOOK_CATALOGS", '"just-a-string"')
+    config = Config.load_from_env()
+
+    # Should fall back to default empty list
+    assert config.custom_runbook_catalogs == []
+
+
+def test_load_from_env_custom_runbook_catalogs_not_set():
+    """Test that unset env var defaults to empty list."""
+    config = Config.load_from_env()
+    assert config.custom_runbook_catalogs == []
