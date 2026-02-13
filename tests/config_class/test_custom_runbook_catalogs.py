@@ -223,7 +223,8 @@ def test_load_from_env_custom_runbook_catalogs_not_a_list(monkeypatch):
     assert config.custom_runbook_catalogs == []
 
 
-def test_load_from_env_custom_runbook_catalogs_not_set():
+def test_load_from_env_custom_runbook_catalogs_not_set(monkeypatch):
     """Test that unset env var defaults to empty list."""
+    monkeypatch.delenv("CUSTOM_RUNBOOK_CATALOGS", raising=False)
     config = Config.load_from_env()
     assert config.custom_runbook_catalogs == []

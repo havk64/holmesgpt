@@ -88,7 +88,10 @@ class ToolsetManager:
             if os.path.isfile(catalog_file):
                 if self.custom_runbook_catalogs is None:
                     self.custom_runbook_catalogs = []
-                self.custom_runbook_catalogs.append(catalog_file)
+                # Dedupe: avoid adding the same catalog twice (e.g. if also set via CUSTOM_RUNBOOK_CATALOGS env var)
+                existing_paths = {os.path.realpath(str(p)) for p in self.custom_runbook_catalogs}
+                if os.path.realpath(catalog_file) not in existing_paths:
+                    self.custom_runbook_catalogs.append(catalog_file)
 
         self.custom_toolsets_from_cli = custom_toolsets_from_cli
         self.toolset_status_location = toolset_status_location
