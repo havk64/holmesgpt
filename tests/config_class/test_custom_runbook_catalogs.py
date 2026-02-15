@@ -1,5 +1,4 @@
 import json
-import os
 
 from holmes.config import Config
 
@@ -23,7 +22,7 @@ def test_config_custom_runbook_catalogs_from_file(tmp_path):
     # Create a config file
     config_file = tmp_path / "config.yaml"
     config_content = f"""
-model: "gpt-4"
+model: "anthropic/claude-sonnet-4-5-20250929"
 custom_runbook_catalogs:
   - {custom_catalog_file}
 """
@@ -59,7 +58,7 @@ def test_config_custom_runbook_catalogs_multiple(tmp_path):
     # Create a config file
     config_file = tmp_path / "config.yaml"
     config_content = f"""
-model: "gpt-4"
+model: "anthropic/claude-sonnet-4-5-20250929"
 custom_runbook_catalogs:
   - {catalog_files[0]}
   - {catalog_files[1]}
@@ -80,7 +79,7 @@ def test_config_custom_runbook_catalogs_empty(tmp_path):
     # Create a config file with empty list
     config_file = tmp_path / "config.yaml"
     config_content = """
-model: "gpt-4"
+model: "anthropic/claude-sonnet-4-5-20250929"
 custom_runbook_catalogs: []
 """
     config_file.write_text(config_content)
@@ -97,7 +96,7 @@ def test_config_custom_runbook_catalogs_not_specified(tmp_path):
     # Create a config file without custom_runbook_catalogs
     config_file = tmp_path / "config.yaml"
     config_content = """
-model: "gpt-4"
+model: "anthropic/claude-sonnet-4-5-20250929"
 """
     config_file.write_text(config_content)
 
@@ -127,7 +126,7 @@ def test_config_custom_runbook_catalogs_passed_to_toolset_manager(tmp_path):
     # Create a config file
     config_file = tmp_path / "config.yaml"
     config_content = f"""
-model: "gpt-4"
+model: "anthropic/claude-sonnet-4-5-20250929"
 custom_runbook_catalogs:
   - {custom_catalog_file}
 """
@@ -164,7 +163,7 @@ def test_config_get_runbook_catalog_with_custom_catalogs(tmp_path):
     # Create a config file
     config_file = tmp_path / "config.yaml"
     config_content = f"""
-model: "gpt-4"
+model: "anthropic/claude-sonnet-4-5-20250929"
 custom_runbook_catalogs:
   - {custom_catalog_file}
 """
