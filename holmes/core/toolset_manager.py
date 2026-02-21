@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, List, Optional, Union
 
 from benedict import benedict
-from pydantic import FilePath
+from pydantic import FilePath, SecretStr
 
 from holmes.core.config import config_path_dir
 from holmes.core.supabase_dal import SupabaseDal
@@ -56,6 +56,9 @@ class ToolsetManager:
         custom_toolsets_from_cli: Optional[List[FilePath]] = None,
         toolset_status_location: Optional[FilePath] = None,
         global_fast_model: Optional[str] = None,
+        global_fast_model_api_base: Optional[str] = None,
+        global_fast_model_api_version: Optional[str] = None,
+        global_fast_model_api_key: Optional[str] = None,
         custom_runbook_catalogs: Optional[List[Union[str, FilePath]]] = None,
         config_file_path: Optional[Path] = None,
     ):
@@ -68,6 +71,9 @@ class ToolsetManager:
         self.toolsets.update(mcp_servers or {})
         self.custom_toolsets = custom_toolsets
         self.global_fast_model = global_fast_model
+        self.global_fast_model_api_base = global_fast_model_api_base
+        self.global_fast_model_api_version = global_fast_model_api_version
+        self.global_fast_model_api_key = global_fast_model_api_key
         self.config_file_path = config_file_path
 
         if toolset_status_location is None:
@@ -584,6 +590,13 @@ class ToolsetManager:
                         and "fast_model" not in transformer.config
                     ):
                         transformer.config["global_fast_model"] = self.global_fast_model
+                        transformer.config["global_fast_model_api_base"] = self.global_fast_model_api_base
+                        transformer.config["global_fast_model_api_version"] = self.global_fast_model_api_version
+                        transformer.config["global_fast_model_api_key"] = (
+                            SecretStr(self.global_fast_model_api_key)
+                            if self.global_fast_model_api_key
+                            else None
+                        )
                         injected_count += 1
                         toolset_injected += 1
                         logger.info(
@@ -618,8 +631,13 @@ class ToolsetManager:
                                 transformer.name == "llm_summarize"
                                 and "fast_model" not in transformer.config
                             ):
-                                transformer.config["global_fast_model"] = (
-                                    self.global_fast_model
+                                transformer.config["global_fast_model"] = self.global_fast_model
+                                transformer.config["global_fast_model_api_base"] = self.global_fast_model_api_base
+                                transformer.config["global_fast_model_api_version"] = self.global_fast_model_api_version
+                                transformer.config["global_fast_model_api_key"] = (
+                                    SecretStr(self.global_fast_model_api_key)
+                                    if self.global_fast_model_api_key
+                                    else None
                                 )
                                 injected_count += 1
                                 toolset_injected += 1
