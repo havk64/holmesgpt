@@ -129,7 +129,7 @@ class Config(RobustaBaseConfig):
                     fast_model_api_base = entry.api_base or entry.base_url
                     fast_model_api_version = entry.api_version
                     if entry.api_key is not None:
-                        fast_model_api_key = entry.api_key.get_secret_value()
+                        fast_model_api_key = entry.api_key  # keep as SecretStr; never unwrap to plaintext
                 # Fall back to config-level api_base/api_version when not in registry entry.
                 # There is no config-level fast-model api_key fallback — the registry entry
                 # is the authoritative source for per-model credentials.

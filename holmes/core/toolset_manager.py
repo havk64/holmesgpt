@@ -58,7 +58,7 @@ class ToolsetManager:
         global_fast_model: Optional[str] = None,
         global_fast_model_api_base: Optional[str] = None,
         global_fast_model_api_version: Optional[str] = None,
-        global_fast_model_api_key: Optional[str] = None,
+        global_fast_model_api_key: Optional[SecretStr] = None,
         custom_runbook_catalogs: Optional[List[Union[str, FilePath]]] = None,
         config_file_path: Optional[Path] = None,
     ):
@@ -548,6 +548,15 @@ class ToolsetManager:
                 existing_toolsets_by_name[new_toolset.name] = new_toolset
                 existing_toolsets_by_name[new_toolset.name] = new_toolset
 
+    def _build_global_fast_model_overrides(self) -> dict:
+        """Return the config overrides to inject into llm_summarize transformers."""
+        return {
+            "global_fast_model": self.global_fast_model,
+            "global_fast_model_api_base": self.global_fast_model_api_base,
+            "global_fast_model_api_version": self.global_fast_model_api_version,
+            "global_fast_model_api_key": self.global_fast_model_api_key,
+        }
+
     def _inject_fast_model_into_transformers(self, toolsets: List[Toolset]) -> None:
         """
         Inject global fast_model setting into all llm_summarize transformers that don't already have fast_model.
@@ -592,14 +601,7 @@ class ToolsetManager:
                         transformer.name == "llm_summarize"
                         and "fast_model" not in transformer.config
                     ):
-                        transformer.config["global_fast_model"] = self.global_fast_model
-                        transformer.config["global_fast_model_api_base"] = self.global_fast_model_api_base
-                        transformer.config["global_fast_model_api_version"] = self.global_fast_model_api_version
-                        transformer.config["global_fast_model_api_key"] = (
-                            SecretStr(self.global_fast_model_api_key)
-                            if self.global_fast_model_api_key
-                            else None
-                        )
+                        transformer.config.update(self._build_global_fast_model_overrides())
                         injected_count += 1
                         toolset_injected += 1
                         logger.info(
@@ -634,14 +636,7 @@ class ToolsetManager:
                                 transformer.name == "llm_summarize"
                                 and "fast_model" not in transformer.config
                             ):
-                                transformer.config["global_fast_model"] = self.global_fast_model
-                                transformer.config["global_fast_model_api_base"] = self.global_fast_model_api_base
-                                transformer.config["global_fast_model_api_version"] = self.global_fast_model_api_version
-                                transformer.config["global_fast_model_api_key"] = (
-                                    SecretStr(self.global_fast_model_api_key)
-                                    if self.global_fast_model_api_key
-                                    else None
-                                )
+                                transformer.config.update(self._build_global_fast_model_overrides())
                                 injected_count += 1
                                 toolset_injected += 1
                                 tool_updated = True

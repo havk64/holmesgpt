@@ -10,8 +10,10 @@ from pathlib import Path
 from unittest.mock import patch
 
 import yaml
+from pydantic import SecretStr
 
 from holmes.config import Config
+from holmes.core.llm import ModelEntry
 
 
 class TestConfigFastModelFlow:
@@ -133,10 +135,6 @@ class TestConfigFastModelFlow:
     def test_fast_model_alias_resolved_through_registry(self):
         """Test that a fast_model alias present in the registry is resolved to its real
         model name, api_base, api_version, and api_key before being passed to ToolsetManager."""
-        from pydantic import SecretStr
-
-        from holmes.core.llm import ModelEntry
-
         fake_registry_entry = ModelEntry(
             model="openai/my-real-model",
             name="my-custom-alias",
@@ -152,7 +150,7 @@ class TestConfigFastModelFlow:
             type(config),
             "llm_model_registry",
             new_callable=lambda: property(
-                lambda self: type(
+                lambda _self: type(
                     "FakeRegistry",
                     (),
                     {"models": {"my-custom-alias": fake_registry_entry}},
@@ -166,4 +164,4 @@ class TestConfigFastModelFlow:
         # Connection params from registry entry should all be propagated
         assert toolset_manager.global_fast_model_api_base == "https://my-proxy.example.com/v1"
         assert toolset_manager.global_fast_model_api_version == "2025-01-01"
-        assert toolset_manager.global_fast_model_api_key == "registry-secret-key"
+        assert toolset_manager.global_fast_model_api_key.get_secret_value() == "registry-secret-key"

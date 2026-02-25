@@ -5,7 +5,7 @@ Unit tests for LLMSummarizeTransformer.
 from unittest.mock import Mock, patch
 
 import pytest
-from pydantic import ValidationError
+from pydantic import SecretStr, ValidationError
 
 from holmes.core.tools import ToolInvokeContext
 from holmes.core.transformers.base import TransformerError
@@ -88,8 +88,6 @@ class TestLLMSummarizeTransformer:
 
     def test_global_fast_model_api_key_is_secret_str(self):
         """Test that global_fast_model_api_key is stored as SecretStr so it redacts itself in logs."""
-        from pydantic import SecretStr
-
         transformer = LLMSummarizeTransformer(
             global_fast_model_api_key="super-secret",
         )
@@ -531,7 +529,7 @@ service/database-service            ClusterIP   10.0.1.101   <none>        5432/
         mock_llm1 = self.create_mock_llm("Summary 1")
         mock_llm2 = self.create_mock_llm("Summary 2")
 
-        def mock_llm_side_effect(model=None, api_key=None, **kwargs):
+        def mock_llm_side_effect(model=None, _api_key=None, **_kwargs):
             if model == "gpt-4o-mini":
                 return mock_llm1
             elif model == "gpt-3.5-turbo":
